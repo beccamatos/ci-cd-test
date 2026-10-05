@@ -7,7 +7,7 @@ import mlflow
 import pandas as pd
 import xgboost as xgb
 from sklearn.feature_extraction import DictVectorizer
-from sklearn.metrics import root_mean_squared_error
+from sklearn.metrics import mean_absolute_error, root_mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import make_pipeline
 
@@ -58,7 +58,7 @@ def train_model(df):
 
     pipeline = make_pipeline(
         DictVectorizer(),
-        xgb.XGBRegressor(n_estimators=100, random_state=42, n_jobs=-1),
+        xgb.XGBRegressor(n_estimators=150, random_state=42, n_jobs=-1),
     )
     pipeline.fit(X_train, y_train)
 
@@ -68,6 +68,8 @@ def train_model(df):
     metrics = {
         "rmse_train": root_mean_squared_error(y_train, y_pred_train),
         "rmse_test": root_mean_squared_error(y_test, y_pred_test),
+        "mae_train": mean_absolute_error(y_train, y_pred_train),
+        "mae_test": mean_absolute_error(y_test, y_pred_test),
         "rows_after_filtering": len(df_processed),
     }
     return pipeline, metrics
@@ -114,6 +116,8 @@ def write_cml_metrics(metrics):
                 "",
                 f"- RMSE on the train set: {metrics['rmse_train']:.4f}",
                 f"- RMSE on the test set: {metrics['rmse_test']:.4f}",
+                f"- MAE on the train set: {metrics['mae_train']:.4f}",
+                f"- MAE on the test set: {metrics['mae_test']:.4f}",
                 f"- Rows after filtering: {metrics['rows_after_filtering']}",
                 "",
             ]
